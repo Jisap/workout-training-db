@@ -22,9 +22,10 @@ export async function signIn(prevState: any, formData: FormData) {
   }
 
   const { email, password } = validatedFields.data
+
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabase.auth.signInWithPassword({ // Si las credenciales son correctas -> se obtiene el token de sesión -> set cookie en el navegador
     email,
     password,
   })
@@ -33,7 +34,7 @@ export async function signIn(prevState: any, formData: FormData) {
     return { error: error.message }
   }
 
-  redirect("/")
+  redirect("/") // Redirecciona al usuario a la página principal -> midleware intercepta la petición -> renueva la session (token) -> session existe -> return response
 }
 
 const SignUpSchema = z.object({

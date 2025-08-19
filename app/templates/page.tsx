@@ -7,7 +7,7 @@ import { Database, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 export default async function WorkoutTemplatesPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },

@@ -31,7 +31,9 @@ function SubmitButton() {
 }
 
 export default function LoginForm() {
-  const [state, formAction] = useActionState(signIn, null)
+
+  // Cuando el usuario hace click en submit invoca la action signIn y le pasa los datos del formulario
+  const [state, formAction] = useActionState(signIn, null);
 
   return (
     <Card className="border-0 shadow-xl bg-card/80 backdrop-blur-sm">

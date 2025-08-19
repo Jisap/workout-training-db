@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import WorkoutForm from "@/components/workout/workout-form"
 
 export default async function NewWorkoutPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const {

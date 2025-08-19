@@ -5,6 +5,9 @@ import { Navigation } from "@/components/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Database, AlertTriangle } from "lucide-react"
 
+
+// Se llega aquí desde el middleware -> session existe -> return response
+
 export default async function HomePage() {
   const supabase = await createClient()
 
@@ -82,6 +85,7 @@ export default async function HomePage() {
     )
   }
 
+  // 5. Se renderiza el componente del Dashboard con los datos del usuario y sus entrenamientos.
   return (
     <div className="min-h-screen bg-background">
       <Navigation />

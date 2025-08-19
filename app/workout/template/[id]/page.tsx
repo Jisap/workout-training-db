@@ -9,7 +9,7 @@ interface TemplateWorkoutPageProps {
 }
 
 export default async function TemplateWorkoutPage({ params }: TemplateWorkoutPageProps) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },

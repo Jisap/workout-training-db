@@ -13,7 +13,7 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
     redirect("/workout/new")
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },

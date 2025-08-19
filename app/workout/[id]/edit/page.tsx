@@ -9,7 +9,7 @@ interface EditWorkoutPageProps {
 }
 
 export default async function EditWorkoutPage({ params }: EditWorkoutPageProps) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },
