@@ -2,17 +2,27 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-export async function signIn(prevState: any, formData: FormData) {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
+const SignInSchema = z.object({
+  email: z.string().trim().email({ message: "Por favor, introduce un email válido." }),
+  password: z.string().trim().min(1, { message: "La contraseña es requerida." }),
+})
 
-  if (!email || !password) {
-    return { error: "Email y contraseña son requeridos" }
+export async function signIn(prevState: any, formData: FormData) {
+  const validatedFields = SignInSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  })
+
+  if (!validatedFields.success) {
+    const errorMessage = validatedFields.error.errors.map((e) => e.message).join(" ")
+    return { error: errorMessage }
   }
 
-  const supabase = createClient()
+  const { email, password } = validatedFields.data
+  const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -26,15 +36,24 @@ export async function signIn(prevState: any, formData: FormData) {
   redirect("/")
 }
 
-export async function signUp(prevState: any, formData: FormData) {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
+const SignUpSchema = z.object({
+  email: z.string().trim().email({ message: "Por favor, introduce un email válido." }),
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+})
 
-  if (!email || !password) {
-    return { error: "Email y contraseña son requeridos" }
+export async function signUp(prevState: any, formData: FormData) {
+  const validatedFields = SignUpSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  })
+
+  if (!validatedFields.success) {
+    const errorMessage = validatedFields.error.errors.map((e) => e.message).join(" ")
+    return { error: errorMessage }
   }
 
-  const supabase = createClient()
+  const { email, password } = validatedFields.data
+  const supabase = await createClient()
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -54,13 +73,13 @@ export async function signUp(prevState: any, formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = createClient()
+  const supabase = await createClient()
   await supabase.auth.signOut()
   redirect("/auth/login")
 }
 
 export async function createWorkout(prevState: any, formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },
@@ -113,7 +132,7 @@ export async function createWorkout(prevState: any, formData: FormData) {
 }
 
 export async function deleteWorkout(workoutId: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },
@@ -133,7 +152,7 @@ export async function deleteWorkout(workoutId: string) {
 }
 
 export async function updateWorkout(prevState: any, formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },
@@ -183,7 +202,7 @@ export async function updateWorkout(prevState: any, formData: FormData) {
 }
 
 export async function toggleWorkoutFavorite(workoutId: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },
@@ -228,7 +247,7 @@ export async function toggleWorkoutFavorite(workoutId: string) {
 }
 
 export async function createWorkoutFromTemplate(templateId: string, customName?: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },
@@ -275,7 +294,7 @@ export async function completeWorkoutSession(
   notes?: string,
   rating?: number,
 ) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },

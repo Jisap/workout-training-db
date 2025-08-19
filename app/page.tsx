@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Database, AlertTriangle } from "lucide-react"
 
 export default async function HomePage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { user },
