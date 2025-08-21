@@ -28,7 +28,8 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
       .from("workouts")
       .select("*")
       .eq("id", params.id)
-      .eq("user_id", user.id)
+      // A workout can be viewed if it belongs to the user or is a public template
+      .or(`user_id.eq.${user.id},user_id.is.null`)
       .single()
 
     if (error) {
