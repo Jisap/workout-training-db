@@ -24,14 +24,14 @@ CREATE INDEX IF NOT EXISTS idx_workouts_duration ON workouts(duration);
 ALTER TABLE workouts ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies first to make script idempotent
-DROP POLICY IF EXISTS "Users can view own workouts" ON workouts;
+DROP POLICY IF EXISTS "Users can view own workouts or public templates" ON workouts;
 DROP POLICY IF EXISTS "Users can insert own workouts" ON workouts;
 DROP POLICY IF EXISTS "Users can update own workouts" ON workouts;
 DROP POLICY IF EXISTS "Users can delete own workouts" ON workouts;
 
--- Create policy so users can only see their own workouts
-CREATE POLICY "Users can view own workouts" ON workouts
-  FOR SELECT USING (auth.uid() = user_id);
+-- Create policy so users can see their own workouts OR public templates (user_id is NULL)
+CREATE POLICY "Users can view own workouts or public templates" ON workouts
+  FOR SELECT USING (auth.uid() = user_id OR user_id IS NULL);
 
 -- Create policy so users can insert their own workouts
 CREATE POLICY "Users can insert own workouts" ON workouts

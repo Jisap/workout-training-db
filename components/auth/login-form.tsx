@@ -90,6 +90,9 @@ export default function LoginForm() {
               Regístrate aquí
             </Link>
           </div>
+          <Link href="/landing" className="text-sm text-muted-foreground hover:text-primary pt-2">
+            &larr; Volver a la página principal
+          </Link>
         </CardFooter>
       </form>
     </Card>

@@ -79,7 +79,7 @@ export default function WorkoutCard({ workout, isFavorite = false, isTemplate = 
         </div>
       )}
 
-      <CardHeader className="pb-3">
+      <CardHeader className={`pb-3 ${isTemplate ? "pt-9" : ""}`}>
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <CardTitle className="text-lg font-serif line-clamp-1">{workout.name}</CardTitle>

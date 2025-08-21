@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Search, Plus, Filter, Clock, Target, Dumbbell, LogOut, Star } from "lucide-react"
 import Link from "next/link"
 import { signOut } from "@/lib/actions"
@@ -20,44 +21,81 @@ interface DashboardProps {
   initialWorkouts: Workout[]
 }
 
+// Define a unified filter state shape
+interface Filters {
+  difficulty: string
+  equipment: string[]
+  muscleGroups: string[]
+  durationRange: [number, number]
+}
+
 export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
   const [workouts] = useState<Workout[]>(initialWorkouts || [])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedType, setSelectedType] = useState<string>("all")
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all")
-  const [selectedDuration, setSelectedDuration] = useState<string>("all")
+  const [viewMode, setViewMode] = useState<"all" | "mine">("all")
   const [showFilters, setShowFilters] = useState(false)
 
-  // Filter workouts based on search and filters
+  // Unified state for all filters except search and type
+  const [filters, setFilters] = useState<Filters>({
+    difficulty: "all",
+    equipment: [],
+    muscleGroups: [],
+    durationRange: [0, 120],
+  })
+
+  // Handler for the simple duration dropdown
+  const handleSimpleDurationChange = (value: string) => {
+    let newRange: [number, number] = [0, 120]
+    switch (value) {
+      case "short":
+        newRange = [0, 20]
+        break
+      case "medium":
+        newRange = [21, 40]
+        break
+      case "long":
+        newRange = [41, 120]
+        break
+    }
+    setFilters((prev) => ({ ...prev, durationRange: newRange }))
+  }
+
+  // Filter workouts based on search and all filters
   const filteredWorkouts = useMemo(() => {
     return workouts.filter((workout) => {
+      // Filter by view mode (all vs. user's own)
+      const matchesViewMode = viewMode === "all" || (viewMode === "mine" && !!workout.user_id)
+
       const matchesSearch =
         workout.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         workout.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         workout.muscle_groups.some((group) => group.toLowerCase().includes(searchQuery.toLowerCase()))
 
       const matchesType = selectedType === "all" || workout.type === selectedType
-      const matchesDifficulty = selectedDifficulty === "all" || workout.difficulty === selectedDifficulty
+      const matchesDifficulty = filters.difficulty === "all" || workout.difficulty === filters.difficulty
 
-      let matchesDuration = true
-      if (selectedDuration !== "all") {
-        const duration = workout.duration
-        switch (selectedDuration) {
-          case "short":
-            matchesDuration = duration <= 20
-            break
-          case "medium":
-            matchesDuration = duration > 20 && duration <= 40
-            break
-          case "long":
-            matchesDuration = duration > 40
-            break
-        }
-      }
+      const matchesEquipment =
+        filters.equipment.length === 0 || filters.equipment.every((equip) => workout.equipment.includes(equip))
 
-      return matchesSearch && matchesType && matchesDifficulty && matchesDuration
+      const matchesMuscleGroups =
+        filters.muscleGroups.length === 0 ||
+        filters.muscleGroups.some((group) => workout.muscle_groups.includes(group))
+
+      const matchesDuration =
+        workout.duration >= filters.durationRange[0] && workout.duration <= filters.durationRange[1]
+
+      return (
+        matchesViewMode &&
+        matchesSearch &&
+        matchesType &&
+        matchesDifficulty &&
+        matchesEquipment &&
+        matchesMuscleGroups &&
+        matchesDuration
+      )
     })
-  }, [workouts, searchQuery, selectedType, selectedDifficulty, selectedDuration])
+  }, [workouts, searchQuery, selectedType, filters, viewMode])
 
   // Group workouts by type for tabs
   const workoutsByType = useMemo(() => {
@@ -174,6 +212,28 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
         {/* Search and Filters */}
         <Card className="border-0 shadow-sm bg-card/60 backdrop-blur-sm mb-8">
           <CardContent className="p-6">
+            <div className="flex justify-center mb-6">
+              <ToggleGroup
+                type="single"
+                value={viewMode}
+                onValueChange={(value) => {
+                  if (value) setViewMode(value as "all" | "mine")
+                }}
+              >
+                <ToggleGroupItem value="all" aria-label="Ver todos los entrenamientos">
+                  <Star className="h-4 w-4 mr-2" />
+                  Todos
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="mine" 
+                  aria-label="Ver mis entrenamientos" 
+                  className="whitespace-normal break-words"
+                >
+                  <Dumbbell className="h-4 w-4 ml-4" />
+                  <span className="mr-4">Propios</span>
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -186,7 +246,10 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
               </div>
 
               <div className="flex gap-2">
-                <Select value={selectedType} onValueChange={setSelectedType}>
+                <Select
+                  value={selectedType}
+                  onValueChange={setSelectedType}
+                >
                   <SelectTrigger className="w-40 h-12 bg-background">
                     <SelectValue placeholder="Tipo" />
                   </SelectTrigger>
@@ -200,7 +263,10 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
                   </SelectContent>
                 </Select>
 
-                <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                <Select
+                  value={filters.difficulty}
+                  onValueChange={(value) => setFilters((prev) => ({ ...prev, difficulty: value }))}
+                >
                   <SelectTrigger className="w-40 h-12 bg-background">
                     <SelectValue placeholder="Dificultad" />
                   </SelectTrigger>
@@ -212,7 +278,7 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
                   </SelectContent>
                 </Select>
 
-                <Select value={selectedDuration} onValueChange={setSelectedDuration}>
+                <Select onValueChange={handleSimpleDurationChange}>
                   <SelectTrigger className="w-40 h-12 bg-background">
                     <SelectValue placeholder="Duración" />
                   </SelectTrigger>
@@ -236,13 +302,7 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
             </div>
 
             {showFilters && (
-              <FilterPanel
-                workouts={workouts}
-                onFiltersChange={(filters) => {
-                  // Handle advanced filters here
-                  console.log("Advanced filters:", filters)
-                }}
-              />
+              <FilterPanel workouts={workouts} filters={filters} onFiltersChange={setFilters} />
             )}
           </CardContent>
         </Card>
@@ -291,7 +351,7 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
             <TabsContent value="all" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredWorkouts.map((workout) => (
-                  <WorkoutCard key={workout.id} workout={workout} />
+                  <WorkoutCard key={workout.id} workout={workout} isTemplate={!workout.user_id} />
                 ))}
               </div>
             </TabsContent>
@@ -300,7 +360,7 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
               <TabsContent key={type} value={type} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {workoutsByType[type].map((workout) => (
-                    <WorkoutCard key={workout.id} workout={workout} />
+                    <WorkoutCard key={workout.id} workout={workout} isTemplate={!workout.user_id} />
                   ))}
                 </div>
               </TabsContent>

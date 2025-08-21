@@ -3,8 +3,8 @@ import { redirect } from "next/navigation"
 import Dashboard from "@/components/dashboard/dashboard"
 import { Navigation } from "@/components/navigation"
 import { Card, CardContent } from "@/components/ui/card"
-import { Database, AlertTriangle } from "lucide-react"
-
+import { AlertTriangle, RefreshCw } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 // Se llega aquí desde el middleware -> session existe -> return response
 
@@ -26,7 +26,8 @@ export default async function HomePage() {
     const { data, error } = await supabase
       .from("workouts")
       .select("*")
-      .eq("user_id", user.id)
+      // Fetch workouts created by the user OR public templates (user_id is null)
+      .or(`user_id.eq.${user.id},user_id.is.null`)
       .order("created_at", { ascending: false })
 
     if (error) {
@@ -50,34 +51,19 @@ export default async function HomePage() {
         <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-secondary/20 to-primary/5 flex items-center justify-center p-4">
           <Card className="max-w-md w-full border-0 shadow-lg bg-card/80 backdrop-blur-sm">
             <CardContent className="p-8 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 dark:bg-orange-900/20 rounded-2xl mb-6">
-                <AlertTriangle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-destructive/10 rounded-2xl mb-6">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
               </div>
-              <h2 className="text-2xl font-serif font-bold mb-4">Base de datos no configurada</h2>
+              <h2 className="text-2xl font-serif font-bold mb-4">¡Ups! Algo salió mal</h2>
               <p className="text-muted-foreground mb-6">
-                Para usar la aplicación, necesitas ejecutar los scripts SQL para crear las tablas de la base de datos.
+                No pudimos cargar tus datos en este momento. Por favor, intenta recargar la página.
               </p>
-              <div className="space-y-3 text-sm text-left bg-muted/50 rounded-lg p-4 mb-6">
-                <p className="font-medium">Pasos a seguir:</p>
-                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                  <li>
-                    Ejecuta el script:{" "}
-                    <code className="bg-background px-1 rounded">scripts/01-create-workouts-table.sql</code>
-                  </li>
-                  <li>
-                    Ejecuta el script:{" "}
-                    <code className="bg-background px-1 rounded">scripts/02-seed-sample-workouts.sql</code>
-                  </li>
-                  <li>Recarga esta página</li>
-                </ol>
-              </div>
-              <a
-                href="/"
-                className="inline-flex items-center justify-center w-full h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium transition-colors"
-              >
-                <Database className="h-4 w-4 mr-2" />
-                Recargar página
-              </a>
+              <Button asChild className="w-full">
+                <a href="/">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Recargar página
+                </a>
+              </Button>
             </CardContent>
           </Card>
         </div>

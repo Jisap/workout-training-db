@@ -1,7 +1,5 @@
 "use client"
 
-import { useState } from "react"
-import type { Database } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,39 +7,49 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { X } from "lucide-react"
 
+import type { Database } from "@/lib/supabase/client"
+
 type Workout = Database["public"]["Tables"]["workouts"]["Row"]
+
+interface Filters {
+  difficulty: string
+  equipment: string[]
+  muscleGroups: string[]
+  durationRange: [number, number]
+}
 
 interface FilterPanelProps {
   workouts: Workout[]
-  onFiltersChange: (filters: any) => void
+  filters: Filters
+  onFiltersChange: (updater: (prev: Filters) => Filters) => void
 }
 
-export default function FilterPanel({ workouts, onFiltersChange }: FilterPanelProps) {
-  const [selectedEquipment, setSelectedEquipment] = useState<string[]>([])
-  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>([])
-  const [durationRange, setDurationRange] = useState<number[]>([0, 120])
-
+export default function FilterPanel({ workouts, filters, onFiltersChange }: FilterPanelProps) {
   // Extract unique equipment and muscle groups from workouts
   const allEquipment = Array.from(new Set(workouts.flatMap((w) => w.equipment)))
   const allMuscleGroups = Array.from(new Set(workouts.flatMap((w) => w.muscle_groups)))
 
   const handleEquipmentChange = (equipment: string, checked: boolean) => {
-    const updated = checked ? [...selectedEquipment, equipment] : selectedEquipment.filter((e) => e !== equipment)
-    setSelectedEquipment(updated)
-    onFiltersChange({ equipment: updated, muscleGroups: selectedMuscleGroups, durationRange })
+    onFiltersChange((prev) => ({
+      ...prev,
+      equipment: checked ? [...prev.equipment, equipment] : prev.equipment.filter((e) => e !== equipment),
+    }))
   }
 
   const handleMuscleGroupChange = (group: string, checked: boolean) => {
-    const updated = checked ? [...selectedMuscleGroups, group] : selectedMuscleGroups.filter((g) => g !== group)
-    setSelectedMuscleGroups(updated)
-    onFiltersChange({ equipment: selectedEquipment, muscleGroups: updated, durationRange })
+    onFiltersChange((prev) => ({
+      ...prev,
+      muscleGroups: checked ? [...prev.muscleGroups, group] : prev.muscleGroups.filter((g) => g !== group),
+    }))
   }
 
   const clearAllFilters = () => {
-    setSelectedEquipment([])
-    setSelectedMuscleGroups([])
-    setDurationRange([0, 120])
-    onFiltersChange({ equipment: [], muscleGroups: [], durationRange: [0, 120] })
+    onFiltersChange(() => ({
+      difficulty: "all",
+      equipment: [],
+      muscleGroups: [],
+      durationRange: [0, 120],
+    }))
   }
 
   return (
@@ -62,23 +70,18 @@ export default function FilterPanel({ workouts, onFiltersChange }: FilterPanelPr
           <h4 className="font-medium text-sm">Duración (minutos)</h4>
           <div className="px-2">
             <Slider
-              value={durationRange}
-              onValueChange={(value) => {
-                setDurationRange(value)
-                onFiltersChange({
-                  equipment: selectedEquipment,
-                  muscleGroups: selectedMuscleGroups,
-                  durationRange: value,
-                })
-              }}
+              value={filters.durationRange}
+              onValueChange={(value) =>
+                onFiltersChange((prev) => ({ ...prev, durationRange: value as [number, number] }))
+              }
               max={120}
               min={0}
               step={5}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>{durationRange[0]} min</span>
-              <span>{durationRange[1]} min</span>
+              <span>{filters.durationRange[0]} min</span>
+              <span>{filters.durationRange[1]} min</span>
             </div>
           </div>
         </div>
@@ -92,7 +95,7 @@ export default function FilterPanel({ workouts, onFiltersChange }: FilterPanelPr
                 <div key={equipment} className="flex items-center space-x-2">
                   <Checkbox
                     id={`equipment-${equipment}`}
-                    checked={selectedEquipment.includes(equipment)}
+                    checked={filters.equipment.includes(equipment)}
                     onCheckedChange={(checked) => handleEquipmentChange(equipment, checked as boolean)}
                   />
                   <label
@@ -115,9 +118,9 @@ export default function FilterPanel({ workouts, onFiltersChange }: FilterPanelPr
               {allMuscleGroups.map((group) => (
                 <Badge
                   key={group}
-                  variant={selectedMuscleGroups.includes(group) ? "default" : "outline"}
+                  variant={filters.muscleGroups.includes(group) ? "default" : "outline"}
                   className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                  onClick={() => handleMuscleGroupChange(group, !selectedMuscleGroups.includes(group))}
+                  onClick={() => handleMuscleGroupChange(group, !filters.muscleGroups.includes(group))}
                 >
                   {group}
                 </Badge>
@@ -127,17 +130,17 @@ export default function FilterPanel({ workouts, onFiltersChange }: FilterPanelPr
         )}
 
         {/* Active Filters Summary */}
-        {(selectedEquipment.length > 0 || selectedMuscleGroups.length > 0) && (
+        {(filters.equipment.length > 0 || filters.muscleGroups.length > 0) && (
           <div className="space-y-2 pt-4 border-t">
             <h4 className="font-medium text-sm">Filtros Activos</h4>
             <div className="flex flex-wrap gap-2">
-              {selectedEquipment.map((equipment) => (
+              {filters.equipment.map((equipment) => (
                 <Badge key={equipment} variant="secondary" className="text-xs">
                   {equipment}
                   <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleEquipmentChange(equipment, false)} />
                 </Badge>
               ))}
-              {selectedMuscleGroups.map((group) => (
+              {filters.muscleGroups.map((group) => (
                 <Badge key={group} variant="secondary" className="text-xs">
                   {group}
                   <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleMuscleGroupChange(group, false)} />
