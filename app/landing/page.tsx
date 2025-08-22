@@ -44,7 +44,7 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="h-[70vh] w-full flex flex-col justify-center bg-gradient-to-b from-background to-slate-50 dark:from-background dark:to-slate-900/80">
+        <section className="h-[80vh] w-full flex flex-col justify-center bg-gradient-to-b from-background to-slate-50 dark:from-background dark:to-slate-900/80">
           <div className="container mx-auto px-4 md:px-6 text-center">
             <div className="max-w-3xl mx-auto space-y-4">
               <h1 className="text-4xl font-bold tracking-normal sm:text-5xl md:text-6xl font-serif">
