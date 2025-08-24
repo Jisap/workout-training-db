@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Home, Plus, User, Dumbbell } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./theme-toggle"
+import Logo from "./Logo"
 
 export function Navigation() {
   const pathname = usePathname()
@@ -37,10 +38,15 @@ export function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-2">
+            {/* <Link href="/" className="flex items-center space-x-2">
               <Dumbbell className="h-6 w-6 text-primary" />
               <span className="font-bold text-xl">FitTracker</span>
-            </Link>
+            </Link> */}
+
+            <div className="flex items-center space-x-2">
+              <Logo />
+              <p className="font-bold text-xl">FitTracker</p>
+            </div>
 
             <div className="hidden md:flex items-center space-x-6">
               {navItems.map((item) => {

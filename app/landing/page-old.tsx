@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dumbbell, LineChart, Lock, Smartphone, Palette, CheckSquare } from "lucide-react"
 import { Navigation } from "@/components/navigation"
+import Header from "@/components/Header"
 
 export default function LandingPage() {
   const features = [
@@ -40,38 +41,24 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Navigation />
-
+      <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full min-h-screen overflow-hidden flex items-center justify-center p-4">
-          {/* Fondo: imagen + gradiente */}
-          <div className="absolute inset-0 z-0">
-            <div
-              className="absolute inset-0 bg-cover bg-center filter blur-[2px] scale-105"
-              style={{ backgroundImage: "url('/pexels-victorfreitas-841130.jpg')" }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/80 via-80% to-slate-100 to-95% dark:to-slate-900/80" />
-          </div>
-          <div className="relative z-10 container mx-auto px-4 md:px-6 text-center text-white">
+        <section className="h-[80vh] w-full flex flex-col justify-center bg-gradient-to-b from-background to-slate-50 dark:from-background dark:to-slate-900/80">
+          <div className="container mx-auto px-4 md:px-6 text-center">
             <div className="max-w-3xl mx-auto space-y-4">
-              <h1 className="text-4xl font-bold tracking-normal sm:text-5xl md:text-6xl font-serif text-slate-200 drop-shadow-lg">
+              <h1 className="text-4xl font-bold tracking-normal sm:text-5xl md:text-6xl font-serif">
                 Transforma tu Entrenamiento. Registra tu Progreso.
               </h1>
-              <p className="text-lg text-muted-foreground md:text-xl drop-shadow-md">
+              <p className="text-lg text-muted-foreground md:text-xl">
                 Workout Training DB es la herramienta definitiva para registrar, seguir y analizar tus rutinas. Lleva tu
                 fitness al siguiente nivel.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg" className="font-semibold shadow-lg">
+                <Button asChild size="lg" className="font-semibold">
                   <Link href="/auth/signup">Empezar Gratis</Link>
                 </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="font-semibold border-white/80 bg-white/10 text-white shadow-lg backdrop-blur-sm hover:bg-white hover:text-primary"
-                >
+                <Button asChild size="lg" variant="outline" className="font-semibold">
                   <Link href="/auth/login">Iniciar Sesión</Link>
                 </Button>
               </div>
@@ -80,10 +67,7 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section */}
-        <section 
-          id="features" 
-          className="w-full pt-32 pb-12 md:pb-24 lg:pb-32 bg-slate-100 dark:bg-slate-900/80"
-        >
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900/80 dark:to-primary/10">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Características Principales</div>
@@ -111,7 +95,7 @@ export default function LandingPage() {
         </section>
 
         {/* How It Works Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-slate-100 to-slate-200/60 dark:from-slate-900/80 dark:to-slate-900/50">
+        <section className="w-full py-28 md:py-24 lg:py-2 bg-gradient-to-b from-slate-100 to-slate-200/60 dark:from-primary/10 dark:to-slate-900/50">
           <div className="container mx-auto grid items-center justify-center gap-4 px-4 text-center md:px-6">
             <div className="space-y-3">
               <h2 className="text-3xl font-bold tracking-normal md:text-4xl/tight font-serif">

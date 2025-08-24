@@ -74,7 +74,6 @@ export default async function HomePage() {
   // 5. Se renderiza el componente del Dashboard con los datos del usuario y sus entrenamientos.
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
       <Dashboard user={user} initialWorkouts={workouts} />
     </div>
   )
