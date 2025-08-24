@@ -13,6 +13,7 @@ import Link from "next/link"
 import { signOut } from "@/lib/actions"
 import WorkoutCard from "./workout-card"
 import FilterPanel from "./filter-panel"
+import { ThemeToggle } from "../theme-toggle"
 
 type Workout = Database["public"]["Tables"]["workouts"]["Row"]
 
@@ -156,6 +157,7 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
                   <LogOut className="h-4 w-4" />
                 </Button>
               </form>
+              <ThemeToggle />
             </div>
           </div>
         </div>

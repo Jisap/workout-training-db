@@ -32,7 +32,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <ThemeProvider defaultTheme="system" storageKey="fitness-ui-theme">
+        <ThemeProvider 
+          defaultTheme="system" 
+          storageKey="fitness-ui-theme"
+        >
           <LenisProvider>{children}</LenisProvider>
         </ThemeProvider>
       </body>
