@@ -18,8 +18,8 @@ import { ThemeToggle } from "../theme-toggle"
 type Workout = Database["public"]["Tables"]["workouts"]["Row"]
 
 interface DashboardProps {
-  user: any
-  initialWorkouts: Workout[]
+  user: any                                     // Usuario que ha iniciado la session
+  initialWorkouts: Workout[]                    // Array con la lista inicial de entrenamientos que incluye tanto plantillas públicas como los entrenamientos personalizados
 }
 
 // Define a unified filter state shape
@@ -31,11 +31,12 @@ interface Filters {
 }
 
 export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
-  const [workouts] = useState<Workout[]>(initialWorkouts || [])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedType, setSelectedType] = useState<string>("all")
-  const [viewMode, setViewMode] = useState<"all" | "mine">("all")
-  const [showFilters, setShowFilters] = useState(false)
+
+  const [workouts] = useState<Workout[]>(initialWorkouts || []);     // Lista comppleta de entrenamientos
+  const [searchQuery, setSearchQuery] = useState("");                // Cadena de búsqueda
+  const [selectedType, setSelectedType] = useState<string>("all")    // Tipo de entrenamiento seleccionado
+  const [viewMode, setViewMode] = useState<"all" | "mine">("all")    // Almacena los valores de los diferentes filtros (tipo, difucltad, duración, etc)
+  const [showFilters, setShowFilters] = useState(false);             // Modo de visualización (todos o solo mis entrenamientos)    
 
   // Unified state for all filters except search and type
   const [filters, setFilters] = useState<Filters>({
@@ -63,9 +64,20 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
   }
 
   // Filter workouts based on search and all filters
+  // Array memoizado que se recalcula si cambia alguno de los filtros o la busqueda
   const filteredWorkouts = useMemo(() => {
-    return workouts.filter((workout) => {
-      // Filter by view mode (all vs. user's own)
+
+    // Toma la lista completa de entrenamientos "workouts" y aplica los siguientes filtros:
+    // 1. Filtrar por modo de visualización (todos o solo mis entrenamientos)
+    // 2. Filtrar por búsqueda
+    // 3. Filtrar por tipo de entrenamiento
+    // 4. Filtrar por dificultad
+    // 5. Filtrar por equipo
+    // 6. Filtrar por grupos musculares
+    // 7. Filtrar por duración
+
+    return workouts.filter((workout) => {             
+      
       const matchesViewMode = viewMode === "all" || (viewMode === "mine" && !!workout.user_id)
 
       const matchesSearch =
@@ -86,6 +98,7 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
       const matchesDuration =
         workout.duration >= filters.durationRange[0] && workout.duration <= filters.durationRange[1]
 
+      // El resultado es una nueva lista que solo contiene los entrenamientos que cumplen todas las condiciones.
       return (
         matchesViewMode &&
         matchesSearch &&
@@ -100,7 +113,7 @@ export default function Dashboard({ user, initialWorkouts }: DashboardProps) {
 
   // Group workouts by type for tabs
   const workoutsByType = useMemo(() => {
-    const grouped = filteredWorkouts.reduce(
+    const grouped = filteredWorkouts.reduce(  // Toma la lista ya filtrada y la agrupa en un objeto donde cada clave es un tipo de entrenamiento (ej. CrossFit) y su valor es un array de los entrenamientos de ese tipo.
       (acc, workout) => {
         if (!acc[workout.type]) {
           acc[workout.type] = []
